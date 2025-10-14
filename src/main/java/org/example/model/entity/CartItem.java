@@ -1,10 +1,23 @@
 package org.example.model.entity;
 
+import java.util.List;
+import jakarta.persistence.*;
+
+@Entity
 public class CartItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "supply_id")
     private Supply supply; // One cart item → One supply
+
     private Integer quantity;
     private Double price;   // Calculated as supply price * quantity
+
+    @ManyToOne
+    @JoinColumn(name = "order_id")
     private Order order;    // Belongs to one order
 
     public CartItem() {}

@@ -1,14 +1,19 @@
 package org.example.model.entity;
 
 import java.util.List;
+import jakarta.persistence.*;
 
+@Entity
 public class Supply {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private Double price;
     private String currency;
     private Boolean inStock;
-    private Level level;             // Belongs to one level
+    private Level level;
+    @OneToMany(mappedBy = "supply", cascade = CascadeType.ALL) // Belongs to one level
     private List<Option> options;    // One supply → Many options
 
     public Supply() {}

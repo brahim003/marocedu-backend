@@ -1,10 +1,18 @@
 package org.example.model.entity;
 
+import jakarta.persistence.*;
+import java.util.List;
+
+@Entity
 public class Option {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String image;
     private Double price;
     private String currency;
+    @ManyToOne
+    @JoinColumn(name = "supply_id")
     private Supply supply; // Belongs to one supply
 
     public Option() {}

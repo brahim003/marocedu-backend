@@ -2,10 +2,19 @@ package org.example.model.entity;
 
 import java.util.List;
 import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
+@Entity
 public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private User user;                // Belongs to one user
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;// Belongs to one user
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<CartItem> cartItems; // One order → Many cart items
     private LocalDateTime orderDate;
     private Double totalPrice;

@@ -1,11 +1,16 @@
 package org.example.model.entity;
 
 import java.util.List;
+import jakarta.persistence.*;
 
+@Entity
 public class School {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String slug;
+    @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)
     private List<Level> levels; // One school → Many levels
 
     public School() {}

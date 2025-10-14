@@ -1,12 +1,30 @@
 package org.example.model.entity;
 
-import java.util.List;
+import jakarta.persistence.Entity;
 
+import java.util.List;
+import jakarta.persistence.*;
+
+@Entity
 public class Level {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String slug;
+
+    @ManyToOne
+    @JoinColumn(name = "school_id")
     private School school;           // Belongs to one school
+
+    @ManyToMany
+    @JoinTable(
+            name = "level_supply",                  // join table name
+            joinColumns = @JoinColumn(name = "level_id"),   // column for Level
+            inverseJoinColumns = @JoinColumn(name = "supply_id") // column for Supply
+    )
     private List<Supply> supplies;   // One level → Many supplies
 
     public Level() {}

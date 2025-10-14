@@ -1,12 +1,18 @@
 package org.example.model.entity;
 
 import java.util.List;
+import jakarta.persistence.*;
 
+@Entity
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
     private String email;
     private String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> orders; // One user → Many orders
 
     public User() {}
