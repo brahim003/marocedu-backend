@@ -8,13 +8,20 @@ public class Supply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private Double price;
     private String currency;
     private Boolean inStock;
+
+    // Many supplies can belong to one level
+    @ManyToOne
+    @JoinColumn(name = "level_id") // foreign key column in Supply table
     private Level level;
-    @OneToMany(mappedBy = "supply", cascade = CascadeType.ALL) // Belongs to one level
-    private List<Option> options;    // One supply → Many options
+
+    // One supply → Many options
+    @OneToMany(mappedBy = "supply", cascade = CascadeType.ALL)
+    private List<Option> options;
 
     public Supply() {}
 
@@ -28,6 +35,7 @@ public class Supply {
         this.options = options;
     }
 
+    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
