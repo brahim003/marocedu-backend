@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 
 import java.util.List;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Level {
@@ -17,6 +18,7 @@ public class Level {
 
     @ManyToOne
     @JoinColumn(name = "school_id")
+    @JsonIgnore
     private School school;           // Belongs to one school
 
     @ManyToMany

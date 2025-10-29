@@ -1,37 +1,53 @@
 package org.example.controller;
 
+import org.example.model.DTO.SchoolDTO;
 import org.example.model.entity.School;
 import org.example.service.SchoolService;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/schools") // hadi ktgol l sprin ana aya ga3 les path atbda b had api/schools
+@RequestMapping("/api/schools") // hadi ktgol l Spring ana aya ga3 les path atbda b had /api/schools
 public class SchoolController {
 
     private final SchoolService schoolService;
 
-    //
     public SchoolController(SchoolService schoolService) {
         this.schoolService = schoolService;
     }
 
-    // hada madrtx fih path dila url hint automatique kiyakhed requestmpping(api/schools par defaut)
+    // GET all schools
     @GetMapping
-    public List<School> getAllSchools() {
+    public List<SchoolDTO> getAllSchools() {
         return schoolService.getAllSchools();
     }
 
-    //  Get school by ID (: http://localhost:8080/api/schools/id/1) ila xfti hna rah tzad requestmapping  api/school ela getmapping
+    // GET school by ID
     @GetMapping("/id/{id}")
-    public School getSchoolById(@PathVariable Long id) {
+    public SchoolDTO getSchoolById(@PathVariable Long id) {
         return schoolService.getSchoolById(id);
     }
 
-    //  Get school by slug (: http://localhost:8080/api/schools/lycee-mohammed-vi)
+    // GET school by slug
     @GetMapping("/{slug}")
-    public School getSchoolBySlug(@PathVariable String slug) {
+    public SchoolDTO getSchoolBySlug(@PathVariable String slug) {
         return schoolService.getSchoolBySlug(slug);
     }
+
+    // CREATE school
+    @PostMapping
+    public ResponseEntity<SchoolDTO> createSchool(@RequestBody School school) {
+        SchoolDTO saved = schoolService.createSchool(school);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    }
+
+    // DELETE school
+    @DeleteMapping("/id/{id}")
+    public ResponseEntity<String> deleteSchool(@PathVariable Long id) {
+        schoolService.deleteSchool(id);
+        return ResponseEntity.ok("School deleted successfully!");
+    }
+
 }
