@@ -13,6 +13,9 @@ public class Supply {
     private Double price;
     private String currency;
     private Boolean inStock;
+    private String marque;
+    private String position; // (Location in stock, e.g., "A6")
+
 
     // Many supplies can belong to one level
     @ManyToOne
@@ -25,17 +28,22 @@ public class Supply {
 
     public Supply() {}
 
-    public Supply(Long id, String name, Double price, String currency, Boolean inStock, Level level, List<Option> options) {
-        this.id = id;
+    // Constructeur m-modifi bach ydkhel fih les champs jdad
+    public Supply(String name, Double price, String currency, Boolean inStock,
+                  String marque, String position, // Hna zednahom
+                  Level level, List<Option> options) {
         this.name = name;
         this.price = price;
         this.currency = currency;
         this.inStock = inStock;
+        this.marque = marque; // Hna zednahom
+        this.position = position; // Hna zednahom
         this.level = level;
         this.options = options;
     }
 
-    // getters & setters
+    // --- getters & setters ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -50,6 +58,24 @@ public class Supply {
 
     public Boolean getInStock() { return inStock; }
     public void setInStock(Boolean inStock) { this.inStock = inStock; }
+
+    // --- ✅ Getters/Setters Jdad ---
+    public String getMarque() {
+        return marque;
+    }
+
+    public void setMarque(String marque) {
+        this.marque = marque;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+    // --- Fin dial Getters/Setters Jdad ---
 
     public Level getLevel() { return level; }
     public void setLevel(Level level) { this.level = level; }

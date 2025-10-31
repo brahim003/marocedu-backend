@@ -1,40 +1,51 @@
 package org.example.model.entity;
 
 import jakarta.persistence.*;
-// import java.util.List; // Cette ligne n'est pas utilisée
+import java.util.ArrayList; // ✅ Import
+import java.util.List; // ✅ Import
 
 @Entity
-@Table(name = "options") // C'est une bonne pratique de nommer la table
+@Table(name = "options")
 public class Option {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String image;
-
-    private String name; // Le champ est ici
-
+    private String name;
     private Double price;
-
     private String currency;
+    private String marque;
+    private String position;
 
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supply_id")
-    private Supply supply; // Belongs to one supply
+    private Supply supply;
 
-    // Constructeur vide (obligatoire pour JPA)
+    // ✅ NOUVELLE RELATION : One-to-Many vers la liste des Images
+    @OneToMany(
+            mappedBy = "option",
+            cascade = CascadeType.ALL, // Ila m7iti option, ytme7aw les images dialha
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<Image> images = new ArrayList<>(); // ✅ Nouvelle liste
+
     public Option() {}
 
-    // Constructeur complet (mis à jour)
-    public Option(String image, String name, Double price, String currency, Supply supply) {
+    // Constructeur complet (non mis à jour pour inclure les images pour la simplicité)
+    public Option(String image, String name, Double price, String currency,
+                  String marque, String position,
+                  Supply supply) {
         this.image = image;
-        this.name = name; // Ajouté ici
+        this.name = name;
         this.price = price;
         this.currency = currency;
+        this.marque = marque;
+        this.position = position;
         this.supply = supply;
     }
 
-    // --- Getters and Setters ---
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -42,7 +53,6 @@ public class Option {
     public String getImage() { return image; }
     public void setImage(String image) { this.image = image; }
 
-    // C'EST LA PARTIE QUI MANQUAIT PROBABLEMENT
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
@@ -52,6 +62,22 @@ public class Option {
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
 
+    public String getMarque() { return marque; }
+    public void setMarque(String marque) { this.marque = marque; }
+
+    public String getPosition() { return position; }
+    public void setPosition(String position) { this.position = position; }
+
+
     public Supply getSupply() { return supply; }
     public void setSupply(Supply supply) { this.supply = supply; }
+
+    // ✅ NOUVEAUX GETTERS/SETTERS
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
 }

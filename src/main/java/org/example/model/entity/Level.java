@@ -1,7 +1,6 @@
 package org.example.model.entity;
 
 import jakarta.persistence.Entity;
-
 import java.util.List;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,6 +14,8 @@ public class Level {
 
     private String name;
     private String slug;
+
+    private String cycle; // <-- add this field
 
     @ManyToOne
     @JoinColumn(name = "school_id")
@@ -31,10 +32,11 @@ public class Level {
 
     public Level() {}
 
-    public Level(Long id, String name, String slug, School school, List<Supply> supplies) {
+    public Level(Long id, String name, String slug, String cycle, School school, List<Supply> supplies) {
         this.id = id;
         this.name = name;
         this.slug = slug;
+        this.cycle = cycle;
         this.school = school;
         this.supplies = supplies;
     }
@@ -47,6 +49,9 @@ public class Level {
 
     public String getSlug() { return slug; }
     public void setSlug(String slug) { this.slug = slug; }
+
+    public String getCycle() { return cycle; } // getter
+    public void setCycle(String cycle) { this.cycle = cycle; } // setter
 
     public School getSchool() { return school; }
     public void setSchool(School school) { this.school = school; }
