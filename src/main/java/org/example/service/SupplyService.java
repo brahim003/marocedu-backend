@@ -37,6 +37,9 @@ public class SupplyService {
         dto.setMarque(supply.getMarque());
         dto.setPosition(supply.getPosition());
 
+        // 🔥🔥🔥 FIX CRITIQUE : ON COPIE LA VALEUR ISBOOK VERS LE DTO 🔥🔥🔥
+        dto.setIsBook(supply.getIsBook());
+
         // 2. Traduction dial les Slugs
         dto.setLevel(supply.getLevel().getSlug());
         dto.setSchool(supply.getLevel().getSchool().getSlug());

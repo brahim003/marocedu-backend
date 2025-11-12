@@ -14,12 +14,15 @@ public class Supply {
     private String currency;
     private Boolean inStock;
     private String marque;
-    private String position; // (Location in stock, e.g., "A6")
+    private String position;
 
+    // ✅ FIX CRITIQUE : On fait le lien explicite avec la colonne "is_book" de la base de données
+    @Column(name = "is_book")
+    private Boolean isBook;
 
     // Many supplies can belong to one level
     @ManyToOne
-    @JoinColumn(name = "level_id") // foreign key column in Supply table
+    @JoinColumn(name = "level_id")
     private Level level;
 
     // One supply → Many options
@@ -28,16 +31,18 @@ public class Supply {
 
     public Supply() {}
 
-    // Constructeur m-modifi bach ydkhel fih les champs jdad
+    // Constructeur complet
     public Supply(String name, Double price, String currency, Boolean inStock,
-                  String marque, String position, // Hna zednahom
+                  String marque, String position,
+                  Boolean isBook,
                   Level level, List<Option> options) {
         this.name = name;
         this.price = price;
         this.currency = currency;
         this.inStock = inStock;
-        this.marque = marque; // Hna zednahom
-        this.position = position; // Hna zednahom
+        this.marque = marque;
+        this.position = position;
+        this.isBook = isBook;
         this.level = level;
         this.options = options;
     }
@@ -59,23 +64,21 @@ public class Supply {
     public Boolean getInStock() { return inStock; }
     public void setInStock(Boolean inStock) { this.inStock = inStock; }
 
-    // --- ✅ Getters/Setters Jdad ---
-    public String getMarque() {
-        return marque;
+    public String getMarque() { return marque; }
+    public void setMarque(String marque) { this.marque = marque; }
+
+    public String getPosition() { return position; }
+    public void setPosition(String position) { this.position = position; }
+
+    // ✅ GETTER SÉCURISÉ
+    // Si la base de données renvoie null, on retourne false pour éviter les erreurs
+    public Boolean getIsBook() {
+        return isBook != null ? isBook : false;
     }
 
-    public void setMarque(String marque) {
-        this.marque = marque;
+    public void setIsBook(Boolean isBook) {
+        this.isBook = isBook;
     }
-
-    public String getPosition() {
-        return position;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
-    // --- Fin dial Getters/Setters Jdad ---
 
     public Level getLevel() { return level; }
     public void setLevel(Level level) { this.level = level; }
