@@ -1,8 +1,9 @@
 package org.example.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // ✅ 1. IMPORT ESSENTIEL
 import jakarta.persistence.*;
-import java.util.ArrayList; // ✅ Import
-import java.util.List; // ✅ Import
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "options")
@@ -17,23 +18,23 @@ public class Option {
     private String marque;
     private String position;
 
-
+    // 🛑 STOP LA BOUCLE INFINIE ICI 🛑
+    // On dit à Java : "Quand tu envoies l'Option au Frontend, n'envoie pas tout le Supply parent avec."
+    @JsonIgnore // ✅ 2. LIGNE MAGIQUE
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supply_id")
     private Supply supply;
 
-    // ✅ NOUVELLE RELATION : One-to-Many vers la liste des Images
     @OneToMany(
             mappedBy = "option",
-            cascade = CascadeType.ALL, // Ila m7iti option, ytme7aw les images dialha
+            cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    private List<Image> images = new ArrayList<>(); // ✅ Nouvelle liste
+    private List<Image> images = new ArrayList<>();
 
     public Option() {}
 
-    // Constructeur complet (non mis à jour pour inclure les images pour la simplicité)
     public Option(String image, String name, Double price, String currency,
                   String marque, String position,
                   Supply supply) {
@@ -46,6 +47,7 @@ public class Option {
         this.supply = supply;
     }
 
+    // --- Getters & Setters ---
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -68,16 +70,9 @@ public class Option {
     public String getPosition() { return position; }
     public void setPosition(String position) { this.position = position; }
 
-
     public Supply getSupply() { return supply; }
     public void setSupply(Supply supply) { this.supply = supply; }
 
-    // ✅ NOUVEAUX GETTERS/SETTERS
-    public List<Image> getImages() {
-        return images;
-    }
-
-    public void setImages(List<Image> images) {
-        this.images = images;
-    }
+    public List<Image> getImages() { return images; }
+    public void setImages(List<Image> images) { this.images = images; }
 }

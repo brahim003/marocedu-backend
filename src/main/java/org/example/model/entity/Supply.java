@@ -16,7 +16,10 @@ public class Supply {
     private String marque;
     private String position;
 
-    // ✅ FIX CRITIQUE : On fait le lien explicite avec la colonne "is_book" de la base de données
+    // ✅ ZEDNA ISBN HNA (Jdid)
+    private String isbn;
+
+    // ✅ FIX CRITIQUE : On fait le lien explicite avec la colonne "is_book"
     @Column(name = "is_book")
     private Boolean isBook;
 
@@ -31,9 +34,10 @@ public class Supply {
 
     public Supply() {}
 
-    // Constructeur complet
+    // Constructeur complet (M-update b ISBN)
     public Supply(String name, Double price, String currency, Boolean inStock,
                   String marque, String position,
+                  String isbn, // 👈 Ajouté ici dans le constructeur
                   Boolean isBook,
                   Level level, List<Option> options) {
         this.name = name;
@@ -42,6 +46,7 @@ public class Supply {
         this.inStock = inStock;
         this.marque = marque;
         this.position = position;
+        this.isbn = isbn; // 👈 Initialisation
         this.isBook = isBook;
         this.level = level;
         this.options = options;
@@ -70,8 +75,11 @@ public class Supply {
     public String getPosition() { return position; }
     public void setPosition(String position) { this.position = position; }
 
-    // ✅ GETTER SÉCURISÉ
-    // Si la base de données renvoie null, on retourne false pour éviter les erreurs
+    // ✅ Getter & Setter ISBN
+    public String getIsbn() { return isbn; }
+    public void setIsbn(String isbn) { this.isbn = isbn; }
+
+    // ✅ GETTER SÉCURISÉ pour isBook
     public Boolean getIsBook() {
         return isBook != null ? isBook : false;
     }
