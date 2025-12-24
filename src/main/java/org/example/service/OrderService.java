@@ -7,12 +7,12 @@ import org.example.model.entity.OrderItem;
 import org.example.model.entity.Supply;
 import org.example.repository.OrderRepository;
 import org.example.repository.SupplyRepository;
-import org.springframework.data.domain.Sort; // ✅ IMPORTANT : Import pour le tri
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List; // ✅ Import pour les listes
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -25,10 +25,10 @@ public class OrderService {
         this.supplyRepository = supplyRepository;
     }
 
-    // --- 1. CRÉATION (C'est ce que tu avais déjà) ---
+    // --- 1. CRÉATION ---
     @Transactional
     public void createOrder(OrderRequestDTO request) {
-
+        // ... (L-Code L-Kamil li 3andk) ...
         Order order = new Order();
         order.setCustomerName(request.getCustomerName());
         order.setCustomerPhone(request.getCustomerPhone());
@@ -60,16 +60,31 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    // --- 2. LECTURE (Ce qu'il manquait pour l'Admin) ---
-
-    // ✅ Pour le Dashboard : Récupérer TOUT (du plus récent au plus ancien)
+    // --- 2. LECTURE ---
     public List<Order> getAllOrders() {
         return orderRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
 
-    // ✅ Pour les Détails : Récupérer UNE SEULE commande
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Commande introuvable avec l'ID : " + id));
+    }
+
+    // ----------------------------------------------------------------------------------
+
+    /**
+     * ✅ NOUVEAU: Mettre à jour le statut d'une commande (L-Wadifa L-Matlouba)
+     */
+    @Transactional
+    public Order updateStatus(Long orderId, String newStatus) {
+        // 1. Trouver L-Order b-L-ID
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Commande introuvable avec l'ID : " + orderId));
+
+        // 2. Taḥdid L-Status L-Jdid (n-dirou lih Majuscule bach ykoun mzyan)
+        order.setStatus(newStatus.toUpperCase());
+
+        // 3. L-7ifd w L-Rdd L-Order L-Muḥaddat
+        return orderRepository.save(order);
     }
 }

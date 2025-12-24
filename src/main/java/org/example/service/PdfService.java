@@ -6,7 +6,7 @@ import org.example.model.entity.Order;
 import org.example.model.entity.OrderItem;
 import org.example.model.entity.Option;
 import org.example.model.entity.Supply;
-import org.example.model.entity.Level; // Needed for access
+import org.example.model.entity.Level;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
@@ -29,16 +29,12 @@ public class PdfService {
     private String getSchoolLevelInfo(Order order) {
         if (order.getItems().isEmpty()) return "";
         try {
-            // Accès: Order -> Item 1 -> Supply -> Level -> School/Name
             Level level = order.getItems().get(0).getSupply().getLevel();
             if (level == null) return "";
-
-            // NOTE: We assume School entity has a getName() method
             String schoolName = level.getSchool().getName();
             String levelName = level.getName();
             return "École : " + schoolName + " / Niveau : " + levelName;
         } catch (Exception e) {
-            // Safety fallback
             return "École/Niveau : Données non spécifiées.";
         }
     }
@@ -133,26 +129,70 @@ public class PdfService {
             Paragraph title = new Paragraph("BON DE PRÉPARATION COMMANDE #" + order.getId(), titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
-
-            // ✅ AJOUT DE L'ÉCOLE ET DU NIVEAU (Bon Prépa)
-            String schoolLevel = getSchoolLevelInfo(order);
-            if (!schoolLevel.isEmpty()) {
-                document.add(new Paragraph(schoolLevel, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.BLACK)));
-            }
-
-            document.add(new Paragraph("Client: " + order.getCustomerName()));
-            document.add(new Paragraph("Adresse: " + order.getDeliveryAddress()));
             document.add(Chunk.NEWLINE);
 
-            // TABLEAU (Trié par Position pour une efficacité maximale)
+            // ✅ INFO ÉCOLE
+            String schoolLevel = getSchoolLevelInfo(order);
+            if (!schoolLevel.isEmpty()) {
+                Paragraph pSchool = new Paragraph(schoolLevel, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.BLACK));
+                pSchool.setAlignment(Element.ALIGN_CENTER);
+                document.add(pSchool);
+                document.add(Chunk.NEWLINE);
+            }
+
+            // INFO CLIENT
+            document.add(new Paragraph("Client: " + order.getCustomerName()));
+            document.add(new Paragraph("Tél: " + order.getCustomerPhone()));
+            document.add(new Paragraph("Adresse: " + order.getDeliveryAddress()));
+
+            // 🔥🔥🔥 AJOUT: NOTES CLIENT (Important pour le préparateur) 🔥🔥🔥
+            if (order.getNotes() != null && !order.getNotes().trim().isEmpty()) {
+                document.add(Chunk.NEWLINE);
+
+                // Titre rouge
+                Font noteTitleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.RED);
+                document.add(new Paragraph("⚠️ REMARQUE CLIENT :", noteTitleFont));
+
+                // Tableau jaune pour mettre en valeur la note
+                PdfPTable noteTable = new PdfPTable(1);
+                noteTable.setWidthPercentage(100);
+                noteTable.setSpacingBefore(5);
+
+                PdfPCell noteCell = new PdfPCell(new Phrase(order.getNotes(), FontFactory.getFont(FontFactory.HELVETICA, 11)));
+                noteCell.setBackgroundColor(new Color(255, 255, 224)); // Light Yellow
+                noteCell.setPadding(8);
+                noteCell.setBorderColor(Color.ORANGE);
+
+                noteTable.addCell(noteCell);
+                document.add(noteTable);
+            }
+            // 🔥🔥🔥 FIN AJOUT NOTES 🔥🔥🔥
+
+            document.add(Chunk.NEWLINE);
+
+            // TABLEAU (Trié par Position)
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
             table.setWidths(new int[]{1, 2, 4, 1});
 
-            addCell(table, "[ ]", true);
-            addCell(table, "POS", true);
-            addCell(table, "Article & Option", true);
-            addCell(table, "QTÉ", true);
+            // Headers avec fond gris
+            PdfPCell h1 = new PdfPCell(new Phrase("[ ]", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.WHITE)));
+            h1.setBackgroundColor(Color.GRAY);
+            h1.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(h1);
+
+            PdfPCell h2 = new PdfPCell(new Phrase("POS", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.WHITE)));
+            h2.setBackgroundColor(Color.GRAY);
+            table.addCell(h2);
+
+            PdfPCell h3 = new PdfPCell(new Phrase("Article & Option", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.WHITE)));
+            h3.setBackgroundColor(Color.GRAY);
+            table.addCell(h3);
+
+            PdfPCell h4 = new PdfPCell(new Phrase("QTÉ", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.WHITE)));
+            h4.setBackgroundColor(Color.GRAY);
+            h4.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(h4);
 
             // Tri par Position
             List<OrderItem> sortedItems = order.getItems().stream()
@@ -169,12 +209,23 @@ public class PdfService {
                     if (opt != null) name += " - " + opt.getName();
                 }
 
-                addCell(table, "___", false);
-                addCell(table, item.getPosition() != null ? item.getPosition() : "??", true);
-                addCell(table, name, false);
+                // Cellule Checkbox vide
+                PdfPCell checkCell = new PdfPCell(new Phrase("___"));
+                checkCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                checkCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                table.addCell(checkCell);
 
+                // Cellule Position
+                String pos = item.getPosition() != null ? item.getPosition() : "??";
+                table.addCell(new Phrase(pos, FontFactory.getFont(FontFactory.HELVETICA, 10)));
+
+                // Cellule Nom
+                table.addCell(new Phrase(name, FontFactory.getFont(FontFactory.HELVETICA, 10)));
+
+                // Cellule Quantité (Gras et Centré)
                 PdfPCell qtyCell = new PdfPCell(new Phrase(String.valueOf(item.getQuantity()), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
                 qtyCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                qtyCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                 qtyCell.setPadding(5);
                 table.addCell(qtyCell);
             }
@@ -185,7 +236,9 @@ public class PdfService {
             if(Boolean.TRUE.equals(order.getPackagingRequested())) {
                 document.add(Chunk.NEWLINE);
                 Font packFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.BLUE);
-                document.add(new Paragraph("⚠️ ATTENTION : EMBALLAGE DEMANDÉ", packFont));
+                Paragraph packPara = new Paragraph("⚠️ ATTENTION : EMBALLAGE DEMANDÉ", packFont);
+                packPara.setAlignment(Element.ALIGN_CENTER);
+                document.add(packPara);
             }
 
             document.close();

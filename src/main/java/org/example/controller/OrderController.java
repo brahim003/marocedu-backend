@@ -3,15 +3,16 @@ package org.example.controller;
 import org.example.model.DTO.OrderRequestDTO;
 import org.example.model.entity.Order;
 import org.example.service.OrderService;
-import org.example.service.PdfService; // 💡 NEW: Import PdfService
-import org.springframework.core.io.InputStreamResource; // For file streaming
-import org.springframework.http.HttpHeaders; // For file headers
-import org.springframework.http.MediaType; // For PDF content type
+import org.example.service.PdfService;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayInputStream; // For stream handling
+import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Map; // 👈 IMPORT ADDED
 
 @RestController
 @RequestMapping("/api/orders")
@@ -19,14 +20,14 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-    private final PdfService pdfService; // ✅ NEW: Declare PDF service
+    private final PdfService pdfService;
 
-    public OrderController(OrderService orderService, PdfService pdfService) { // ✅ UPDATE: Inject PDF service
+    public OrderController(OrderService orderService, PdfService pdfService) {
         this.orderService = orderService;
         this.pdfService = pdfService;
     }
 
-    // --- CRUD and Creation (Existing methods) ---
+    // --- CRUD and Creation ---
 
     @PostMapping("/create")
     public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO orderRequest) {
@@ -54,16 +55,38 @@ public class OrderController {
         }
     }
 
-    // --- PDF GENERATION ENDPOINTS (NEW) ---
+    // ----------------------------------------------------------------------------------
 
-    // 4. Télécharger Facture Client (GET /api/orders/{id}/invoice)
+    /**
+     * ✅ UPDATED: Fix for Status Update
+     * Accepts JSON: { "status": "CONFIRMED" }
+     */
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        try {
+            // Extract the "status" value from the JSON body
+            String newStatus = payload.get("status");
+
+            // Call the service
+            Order updatedOrder = orderService.updateStatus(id, newStatus);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (RuntimeException e) {
+            // Example: Order not found
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // ----------------------------------------------------------------------------------
+
+    // --- PDF GENERATION ENDPOINTS ---
+
+    // 4. Download Client Invoice
     @GetMapping("/{id}/invoice")
     public ResponseEntity<InputStreamResource> downloadInvoice(@PathVariable Long id) {
         Order order = orderService.getOrderById(id);
         ByteArrayInputStream bis = pdfService.generateInvoice(order);
 
         HttpHeaders headers = new HttpHeaders();
-        // Set 'inline' to view in browser, 'attachment' to force download
         headers.add("Content-Disposition", "inline; filename=facture_" + id + ".pdf");
 
         return ResponseEntity
@@ -73,7 +96,7 @@ public class OrderController {
                 .body(new InputStreamResource(bis));
     }
 
-    // 5. Télécharger Bon de Préparation Magasin (GET /api/orders/{id}/preparation)
+    // 5. Download Preparation Slip
     @GetMapping("/{id}/preparation")
     public ResponseEntity<InputStreamResource> downloadPreparation(@PathVariable Long id) {
         Order order = orderService.getOrderById(id);
