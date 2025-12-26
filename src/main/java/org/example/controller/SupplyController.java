@@ -1,16 +1,20 @@
 package org.example.controller;
 
 import org.example.model.DTO.SupplyDTO;
+import org.example.model.DTO.SupplyRequestDTO; // ✅ Import جديد لـ DTO ديال الإدخال
+import org.example.model.entity.Supply;       // ✅ Import جديد لـ Entity
 import org.example.service.SupplyService;
+import org.springframework.http.MediaType;      // ✅ ضروري باش نعرفو نوع البيانات (Multipart)
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile; // ✅ Import ديال الفيشي (الصورة)
+
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/supplies") // Base URL pour toutes les fournitures
+@CrossOrigin("*") // ✅ مهم جداً: باش React يقدر يهضر مع الباكند بلا مشاكل
 public class SupplyController {
 
     private final SupplyService supplyService;
@@ -20,7 +24,31 @@ public class SupplyController {
         this.supplyService = supplyService;
     }
 
-    // ✅ NOUVEL ENDPOINT POUR LE DÉTAIL PRODUIT : GET /api/supplies/{id}
+    // =================================================================
+    // 🆕 1. PARTIE ÉCRITURE : AJOUTER UNE NOUVELLE FOURNITURE (POST)
+    // =================================================================
+
+    // هذا هو الـ Endpoint الجديد اللي كيستقبل JSON (data) و Fichier (image)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Supply> createSupply(
+            // 1. استقبال البيانات (السمية، الثمن، المدرسة، الخيارات...)
+            @RequestPart("data") SupplyRequestDTO request,
+
+            // 2. استقبال التصويرة (اختياري)
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws IOException {
+
+        // نعيطو للخدمة الجديدة فـ Service
+        Supply newSupply = supplyService.createSupplyWithImage(request, image);
+
+        return ResponseEntity.ok(newSupply);
+    }
+
+    // =================================================================
+    // 📖 2. PARTIE LECTURE (GET) - الكود القديم ديالك كما هو
+    // =================================================================
+
+    // ✅ ENDPOINT POUR LE DÉTAIL PRODUIT : GET /api/supplies/{id}
     @GetMapping("/{id}")
     public ResponseEntity<SupplyDTO> getSupplyById(@PathVariable Long id) {
         try {

@@ -18,6 +18,9 @@ public class Option {
     private String marque;
     private String position;
 
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity = 0;
+
     // 🛑 STOP LA BOUCLE INFINIE ICI 🛑
     // On dit à Java : "Quand tu envoies l'Option au Frontend, n'envoie pas tout le Supply parent avec."
     @JsonIgnore // ✅ 2. LIGNE MAGIQUE
@@ -75,4 +78,7 @@ public class Option {
 
     public List<Image> getImages() { return images; }
     public void setImages(List<Image> images) { this.images = images; }
+
+    public Integer getStockQuantity() { return stockQuantity; }
+    public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
 }
