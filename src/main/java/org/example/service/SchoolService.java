@@ -1,14 +1,16 @@
 package org.example.service;
 
-import org.example.model.DTO.SchoolDTO; // L import dialk s7i7
-import org.example.model.entity.Level; // Ghadi n7tajoha f createSchool
+import org.example.model.DTO.SchoolDTO;
+import org.example.model.entity.Level;
 import org.example.model.entity.School;
+import org.example.repository.LevelRepository; // ✅ ضروري تكون كاينة
 import org.example.repository.SchoolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors; // Ghadi nsta3mlo stream hna 7it 7ssan
+import java.util.stream.Collectors;
 
 @Service
 public class SchoolService {
@@ -16,60 +18,44 @@ public class SchoolService {
     @Autowired
     private SchoolRepository schoolRepository;
 
-    // --- 1. L METHOD DIAL "GET ALL" (B DTO) ---
-    // Khallina ghir l method li kay rje3 DTO
-    public List<SchoolDTO> getAllSchools() {
-        // Jib l Entities
-        List<School> schoolEntities = schoolRepository.findAll();
+    @Autowired
+    private LevelRepository levelRepository; // ✅ Injectina LevelRepository
 
-        // 7awelhom l DTOs (b tari9a n9ia b streams)
+    // --- 1. GET ALL ---
+    public List<SchoolDTO> getAllSchools() {
+        List<School> schoolEntities = schoolRepository.findAll();
         return schoolEntities.stream()
-                .map(this::convertToDto) // Katsta3mel l "helper method" li l te7t
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    // --- 2. L METHOD DIAL "GET BY ID" (B DTO) ---
-    // Tbedel l return type l SchoolDTO
+    // --- 2. GET BY ID ---
     public SchoolDTO getSchoolById(Long id) {
-        // Jib l entity 3adi
         School school = schoolRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("School not found"));
-
-        // 7awel l entity l DTO 3ad rj3o
         return convertToDto(school);
     }
 
-    // --- 3. L METHOD DIAL "GET BY SLUG" (B DTO) ---
-    // Tbedel l return type l SchoolDTO
+    // --- 3. GET BY SLUG ---
     public SchoolDTO getSchoolBySlug(String slug) {
-        // Jib l entity 3adi
         School school = schoolRepository.findBySlug(slug)
                 .orElseThrow(() -> new RuntimeException("School not found"));
-
-        // 7awel l entity l DTO 3ad rj3o
         return convertToDto(school);
     }
 
-    // --- 4. L METHOD DIAL "CREATE" (B DTO) ---
-    // Tbedel l return type l SchoolDTO
-    public SchoolDTO createSchool(School school) { // (L 7al l 7ssan howa t 9bel DTO, walakin hada ykhdem)
-
-        // L code dialk dial l levels s7i7
-        if (school.getLevels() != null) {
-            for (Level level : school.getLevels()) {
-                level.setSchool(school);
-            }
-        }
-
-        // 1. Ssjjel l entity f database
+    // --- 4. CREATE SCHOOL (Automated Levels) ---
+    public SchoolDTO createSchool(School school) {
+        // 1. نسجلو المدرسة باش ناخدو ID ديالها
         School savedSchool = schoolRepository.save(school);
 
-        // 2. 7awel l entity li yalah tssjlat l DTO o rj3ha
+        // 2. نصاوبو المستويات أوتوماتيكياً لهاد المدرسة
+        createStandardLevelsForSchool(savedSchool);
+
+        // 3. نرجعو DTO
         return convertToDto(savedSchool);
     }
 
-    // --- 5. L METHOD DIAL "DELETE" (MABDALCH) ---
-    // Hada mzyan 7it kay rje3 void (walo)
+    // --- 5. DELETE ---
     public void deleteSchool(Long id) {
         if (!schoolRepository.existsById(id)) {
             throw new RuntimeException("School not found with id: " + id);
@@ -77,9 +63,8 @@ public class SchoolService {
         schoolRepository.deleteById(id);
     }
 
-    // --- 6. L "HELPER" METHOD (L M3AWN) ---
-    // Had l method 9adnah bach manb9awch n 3awdo l code dial t7wil
-    // "private" 7it ghadi ysta3mel ghir l wast dial had l class
+    // --- 6. HELPER METHODS ---
+
     private SchoolDTO convertToDto(School entity) {
         SchoolDTO dto = new SchoolDTO();
         dto.setId(entity.getId());
@@ -88,5 +73,36 @@ public class SchoolService {
         dto.setLogo(entity.getLogo());
         dto.setCity(entity.getCity());
         return dto;
+    }
+
+    // ✅ الدالة السحرية اللي كتصاوب المستويات
+    private void createStandardLevelsForSchool(School school) {
+        List<Level> levels = new ArrayList<>();
+
+        // --- Maternelle ---
+        levels.add(new Level(null, "Petite Section", "ps", "maternelle", school));
+        levels.add(new Level(null, "Moyenne Section", "ms", "maternelle", school));
+        levels.add(new Level(null, "Grande Section", "gs", "maternelle", school));
+
+        // --- Primaire ---
+        levels.add(new Level(null, "CP", "cp", "primaire", school));
+        levels.add(new Level(null, "CE1", "ce1", "primaire", school));
+        levels.add(new Level(null, "CE2", "ce2", "primaire", school));
+        levels.add(new Level(null, "CM1", "cm1", "primaire", school));
+        levels.add(new Level(null, "CM2", "cm2", "primaire", school));
+        levels.add(new Level(null, "6ème Année", "6e", "primaire", school));
+
+        // --- Collège ---
+        levels.add(new Level(null, "1ère Année Collège", "1ac", "college", school));
+        levels.add(new Level(null, "2ème Année Collège", "2ac", "college", school));
+        levels.add(new Level(null, "3ème Année Collège", "3ac", "college", school));
+
+        // --- Lycée ---
+        levels.add(new Level(null, "Tronc Commun", "tc", "lycee", school));
+        levels.add(new Level(null, "1ère Bac", "1bac", "lycee", school));
+        levels.add(new Level(null, "2ème Bac", "2bac", "lycee", school));
+
+        // تسجيل الكل دفعة واحدة
+        levelRepository.saveAll(levels);
     }
 }

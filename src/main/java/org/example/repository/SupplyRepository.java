@@ -10,9 +10,14 @@ import java.util.List;
 public interface SupplyRepository extends JpaRepository<Supply, Long> {
 
     Supply findByName(String name);
+
+    // الطريقة القديمة (للكليان)
     List<Supply> findByLevelSchoolSlugAndLevelSlug(String schoolSlug, String levelSlug);
 
-    // ✅ NOUVEAU: Method l-L-Dashboard (Low Stock Items Count)
-    // Kat7sab 3adad L-Articles 7sab L-7ala dial L-InStock (Mital: false)
+    // ✅ التعديل هنا: حذف حرف الـ 's' ليصبح 'Level' بدل 'Levels'
+    // هذا يطابق الحقل 'private Level level' الموجود في كلاس Supply
+    List<Supply> findByLevel_Id(Long levelId);
+
+    // Dashboard count
     Long countByInStock(Boolean inStock);
 }

@@ -72,4 +72,25 @@ public class SupplyController {
         // Si la liste est vide, on renvoie 200 OK avec un corps vide.
         return ResponseEntity.ok(supplies);
     }
+
+    // =================================================================
+    // ⚙️ 3. PARTIE ADMIN (GESTION) - Endpoints جداد
+    // =================================================================
+
+    // ✅ باش نجيبو السلع ديال مستوى محدد بـ ID (Admin Panel)
+    @GetMapping("/level/{levelId}")
+    public ResponseEntity<List<SupplyDTO>> getSuppliesByLevelId(@PathVariable Long levelId) {
+        // تأكد أن SupplyService فيه دالة سميتها getSuppliesByLevelId(Long id)
+        List<SupplyDTO> supplies = supplyService.getSuppliesByLevelId(levelId);
+        return ResponseEntity.ok(supplies);
+    }
+
+    // ✅ باش نمسحو سلعة (Delete)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSupply(@PathVariable Long id) {
+        supplyService.deleteSupply(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

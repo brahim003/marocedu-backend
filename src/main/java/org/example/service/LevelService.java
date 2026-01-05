@@ -17,46 +17,19 @@ public class LevelService {
 
     // --- 1. GET levels by school slug ---
     public List<LevelDTO> getLevelsBySchoolSlug(String slug) {
-        // Fetch levels directly using school slug
         List<Level> levels = levelRepository.findBySchoolSlug(slug);
 
-        // If no levels, just return empty list
         return levels.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-
     // --- Helper method: Level → LevelDTO ---
     private LevelDTO convertToDto(Level level) {
-        String cycle = getCycleFromSlug(level.getSlug());
-        return new LevelDTO(level.getName(), level.getSlug(), cycle);
+        // ✅ الحل: خوذ الـ Cycle نيشان من الداتاباز بلا ما تحسبو
+        // بما أن SchoolService ديجا عمراتو صحيح
+        return new LevelDTO(level.getName(), level.getSlug(), level.getCycle());
     }
 
-    // --- Determine cycle from level slug ---
-    private String getCycleFromSlug(String slug) {
-        switch (slug) {
-            case "ps":
-            case "ms":
-            case "gs":
-                return "maternelle";
-            case "cp":
-            case "ce1":
-            case "ce2":
-            case "cm1":
-            case "cm2":
-            case "6e":
-                return "primaire";
-            case "5e":
-            case "4e":
-            case "3e":
-                return "college";
-            case "2nde":
-            case "1bac":
-            case "tale":
-                return "lycee";
-            default:
-                return "unknown";
-        }
-    }
+    // 🗑️ مسحت getCycleFromSlug حيت مابقاش عندنا بيها غرض
 }
